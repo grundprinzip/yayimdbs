@@ -110,6 +110,17 @@ class YayImdbs
         info_hash[PROPERTY_ALIAS[key]] = info_hash[key] if PROPERTY_ALIAS[key]
       end
 
+      # Check the storyline
+      doc.css("#titleStoryLine").each do |div|
+        h2 = div.css("h2")
+        content = div.at("div[itemprop='description'] p")
+        if h2 && content
+          info_hash[:storyline] = content.inner_html.gsub(/<.*$/,"").strip
+        else
+          info_hash[:storyline] = ""
+        end
+      end
+
       unless found_info_divs
         #If we don't find any info divs assume parsing failed
         raise "No info divs found for imdb id #{imdb_id}"
@@ -188,15 +199,14 @@ class YayImdbs
 
       info_hash[:seasons].each do |season_number|
         doc = get_episodes_page(info_hash[:imdb_id], season_number)
-        season = doc.at_css('#episode_top').inner_text
+        season = doc.at_css('#episode_top').inner_text.gsub("Season", "").gsub(/\D/,"")
         episode_list = doc.at_css('.eplist')
         episode_list.css('.info').each do |ep|
           title = ep.at('a[@title]').text
           episode_number = ep.at("meta[itemprop='episodeNumber']")['content']
           episode_plot = ep.at_css('.item_description').text
           episode_air_date = Date.parse(ep.at_css('.airdate').text) rescue nil
-
-          episodes << {:series => season, :episode => episode_number, :title => title, :plot => episode_plot, :date => episode_air_date}
+          episodes << {:series => season.strip.to_i, :episode => episode_number.strip.to_i, :title => title, :plot => episode_plot, :date => episode_air_date}
         end
       end
       info_hash['episodes'] = episodes

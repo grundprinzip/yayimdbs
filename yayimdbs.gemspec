@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["James Smith"]
-  s.date = "2013-03-31"
+  s.date = "2013-06-13"
   s.description = "A simple imdb scraper built on Nokogiri for ruby 1.9+"
   s.email = "James@smithware.co.uk"
   s.extra_rdoc_files = ["README.md"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/o-sam-o/yayimdbs"
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.23"
+  s.rubygems_version = "1.8.25"
   s.summary = "Yet Another Ying IMDB Scraper"
 
   if s.respond_to? :specification_version then

@@ -59,7 +59,7 @@ describe YayImdbs do
       search_results.should == [
           {:imdb_id=>"0335438", :name=>"Starsky & Hutch", :year=>2004, :video_type=>:movie},
           {:imdb_id=>"0072567", :name=>"Starsky and Hutch", :year=>1975, :video_type=>:tv_show},
-          {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:movie},
+          {:imdb_id=>"1380813", :name=>"Starsky & Hutch", :year=>2003, :video_type=>:game},
           {:imdb_id=>"0488639", :name=>"Starsky & Hutch: A Last Look", :year=>2004, :video_type=>:movie},
           {:imdb_id=>"0464230", :name=>"TV Guide Specials: Starsky & Hutch", :year=>2004, :video_type=>:movie},
           {:imdb_id=>"1393834", :name=>"Starsky & Hutch Documentary: The Word on the Street", :year=>1999, :video_type=>:movie},
@@ -99,7 +99,7 @@ describe YayImdbs do
     it 'should detect tv show type' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-      YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      YayImdbs.should_receive(:get_episodes_page).any_number_of_times.with(imdb_id, kind_of(Numeric)).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
     
       YayImdbs.scrap_movie_info(imdb_id)['video_type'].should == :tv_show
     end  
@@ -126,6 +126,14 @@ describe YayImdbs do
       YayImdbs.stub(:get_media_page).and_return(stubbed_page_result('media_page.html'))
       YayImdbs.stub(:get_official_sites_page).and_return(stubbed_page_result('avatar_officialsites.html'))
      end
+
+    it "should extract the storyline correctly" do
+      imdb_id = '1046173'
+      YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('gi_joe_2009.html'))
+      movie_info = YayImdbs.scrap_movie_info(imdb_id)
+      movie_info[:title].should == 'G.I. Joe: The Rise of Cobra'
+      movie_info[:storyline].should == "Two soldiers stationed in Kazahkstan (Captain Duke Hauser and his partner \"Ripcord\") are ordered to transport special warheads created by MARS, an arms' manufacturer controlled by James McCullen. When they are attacked by thieves (led by Anastasia DeCobray, with whom Duke has history), they are saved by a top secret, international special forces unit known as \"G.I. Joe\". The leader of G.I. Joe, General Abernathy (or Hawk) is on the trail of the thieves: an evil organization called \"Cobra\". While Duke and Ripcord train to join the Joes, McCullen (\"Destro\") is secretly working for Cobra and plotting to recapture his metal-eating \"Nanomite\" warheads. Duke and Ripcord (with help from Heavy Duty, Snake Eyes, and the rest of the Joes) must prove that they are Real American Heroes -- by stopping the launch of these warheads before Cobra uses them to take over the world."
+    end
 
     it 'should retrive the metadata for a movie' do
       imdb_id = '0499549'
@@ -155,7 +163,7 @@ describe YayImdbs do
     it 'should retrieve metadata for a tv show' do
       imdb_id = '0411008'
       YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-      YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+      YayImdbs.should_receive(:get_episodes_page).any_number_of_times.with(imdb_id, kind_of(Numeric)).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
       show_info = YayImdbs.scrap_movie_info(imdb_id)
       
       show_info[:title].should == 'Lost'
@@ -177,20 +185,20 @@ describe YayImdbs do
       
       show_info[:episodes].should_not be_nil
       show_info[:episodes].should_not be_empty
-      show_info[:episodes].length.should == 115
+      show_info[:episodes].length.should == 102
       
       series_2_ep_5 = nil
       show_info[:episodes].each do |episode|
         episode[:series].should_not be_nil
         episode[:episode].should_not be_nil
         episode[:title].should_not be_nil
-
-        series_2_ep_5 = episode if episode[:series] == 2 && episode[:episode] == 5
+        series_2_ep_5 = episode if episode[:series] == 6 && episode[:episode] == 3
       end      
-      
-      series_2_ep_5[:title].should == '...And Found'
-      series_2_ep_5[:plot].should == %q{A desperate and growingly insane Michael sets off into the jungle by himself determined to find Walt, but discovers that he is not alone. Meanwhile, Sawyer and Jin are ordered by their captors, the tail crash survivors, to take them to their camp. But they are delayed when Jin and the hulking Mr. Eko are forced to go into the jungle to look for Michael before the dreaded "others" find him first. Back at the beach camp, Sun frantically searches for her missing wedding ring which triggers flashbacks to Sun and Jin's past showing how they met for the first time in early 1990s Seoul, when Jin was working as a doorman of a fancy hotel where Sun was staying at for a courtship engagement set up by her mother.}
-      series_2_ep_5[:date].should == Date.new(y=2005,m=10,d=19)
+
+
+      series_2_ep_5[:title].should == 'What Kate Does'
+      series_2_ep_5[:plot].should == %q{Sayid miraculously comes back to life, but his problems have only just begun. Sawyer escapes, and Kate and Jin go after him. Back in Los Angeles, fugitive Kate helps Claire as she goes into labor.}
+      series_2_ep_5[:date].should == Date.new(y=2010,m=2,d=9)
     end  
 
     it 'should retrive the poster urls' do
@@ -239,7 +247,7 @@ describe YayImdbs do
       it 'for lost' do
         imdb_id = '0411008'
         YayImdbs.should_receive(:get_movie_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.html'))
-        YayImdbs.should_receive(:get_episodes_page).with(imdb_id).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
+        YayImdbs.should_receive(:get_episodes_page).any_number_of_times.with(imdb_id, kind_of(Numeric)).and_return(stubbed_page_result('Lost.2004.Episodes.html'))
         show_info = YayImdbs.scrap_movie_info(imdb_id)
 
         show_info[:rating].should == 8.3
